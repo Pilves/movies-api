@@ -3,7 +3,7 @@
 # 🎬 Movie Database API
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
+[![Java](https://img.shields.io/badge/Java-20-orange.svg)](https://www.oracle.com/java/)
 [![SQLite](https://img.shields.io/badge/SQLite-3.45.1-blue.svg)](https://www.sqlite.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -41,7 +41,7 @@ A modern, robust REST API for managing movie data with advanced querying capabil
 ### Prerequisites
 
 You'll need:
-- Java 17+ 
+- Java 20+ 
 - Maven 3.6+
 - Your favorite IDE (we recommend IntelliJ IDEA)
 
@@ -49,7 +49,7 @@ You'll need:
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/movies-api
+git clone https://github.com/pilves/movies-api
 
 # Navigate to project
 cd movies-api
@@ -207,8 +207,8 @@ http POST localhost:8080/api/movies \
 
 If you find this project useful, please give it a star. It helps others discover this project.
 
-[Report Bug](https://github.com/yourusername/movies-api/issues) •
-[Request Feature](https://github.com/yourusername/movies-api/issues)
+[Report Bug](https://github.com/pilves/movies-api/issues) •
+[Request Feature](https://github.com/pilves/movies-api/issues)
 
 </div>
 
