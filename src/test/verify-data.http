@@ -1,0 +1,23 @@
+### 1. Verify Genres
+GET http://localhost:8080/api/genres
+
+### 2. Get all movies (paginated)
+GET http://localhost:8080/api/movies?page=0&size=20
+
+### 3. Get movies by genre (Action - id 1)
+GET http://localhost:8080/api/movies?genreId=1&page=0&size=20
+
+### 4. Get movies by genre (Drama - id 3)
+GET http://localhost:8080/api/movies?genreId=3&page=0&size=20
+
+### 5. Get movies by year (2014)
+GET http://localhost:8080/api/movies?year=2014&page=0&size=20
+
+### 6. Get all actors (paginated)
+GET http://localhost:8080/api/actors?page=0&size=20
+
+### 7. Get movies for specific actor (Tom Hanks - id 1)
+GET http://localhost:8080/api/movies?actorId=1&page=0&size=20
+
+### 8. Search movies by title containing "The"
+GET http://localhost:8080/api/movies?title=The&page=0&size=20
