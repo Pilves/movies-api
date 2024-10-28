@@ -1,0 +1,156 @@
+### 1. Verify Basic Entity Counts
+### Check all genres (should be 6)
+GET http://localhost:8080/api/genres
+
+> {%
+    client.test("Should have all genres", function() {
+        client.assert(response.body.length === 6, "Wrong number of genres");
+        const genreNames = response.body.map(g => g.name);
+        client.assert(genreNames.includes("Action"), "Missing Action genre");
+        client.assert(genreNames.includes("Drama"), "Missing Drama genre");
+        client.assert(genreNames.includes("Science Fiction"), "Missing Science Fiction genre");
+        client.assert(genreNames.includes("Comedy"), "Missing Comedy genre");
+        client.assert(genreNames.includes("Thriller"), "Missing Thriller genre");
+        client.assert(genreNames.includes("Romance"), "Missing Romance genre");
+    });
+%}
+
+### Check all actors (should be 15)
+GET http://localhost:8080/api/actors?size=50
+
+> {%
+    client.test("Should have all actors", function() {
+        client.assert(response.body.totalElements === 15, "Wrong number of actors");
+        const actors = response.body.content;
+        client.assert(actors.some(a => a.name === "Emma Stone"), "Missing Emma Stone");
+        client.assert(actors.some(a => a.name === "Ryan Gosling"), "Missing Ryan Gosling");
+        client.assert(actors.some(a => a.name === "Leonardo DiCaprio"), "Missing Leonardo DiCaprio");
+    });
+%}
+
+### Check all movies (should be 20)
+GET http://localhost:8080/api/movies?size=50
+
+> {%
+    client.test("Should have all movies", function() {
+        client.assert(response.body.totalElements === 20, "Wrong number of movies");
+        const movies = response.body.content;
+        // Check year range
+        const years = movies.map(m => m.releaseYear);
+        const minYear = Math.min(...years);
+        const maxYear = Math.max(...years);
+        client.assert(maxYear === 2022, "Missing recent movies");
+        client.assert(minYear === 2003, "Missing older movies");
+        client.assert(maxYear - minYear >= 19, "Insufficient year range");
+    });
+%}
+
+### 2. Verify Genre Distribution
+### Check Action movies
+GET http://localhost:8080/api/movies?genreId=1&size=50
+
+> {%
+    client.test("Should have enough Action movies", function() {
+        client.assert(response.body.totalElements >= 6, "Not enough Action movies");
+    });
+%}
+
+### Check Drama movies
+GET http://localhost:8080/api/movies?genreId=2&size=50
+
+> {%
+    client.test("Should have enough Drama movies", function() {
+        client.assert(response.body.totalElements >= 7, "Not enough Drama movies");
+    });
+%}
+
+### Check Sci-Fi movies
+GET http://localhost:8080/api/movies?genreId=3&size=50
+
+> {%
+    client.test("Should have enough Sci-Fi movies", function() {
+        client.assert(response.body.totalElements >= 5, "Not enough Sci-Fi movies");
+    });
+%}
+
+### 3. Verify Actor Movie Counts
+### Check Emma Stone's movies (should be 3)
+GET http://localhost:8080/api/movies?actorId=1&size=50
+
+> {%
+    client.test("Emma Stone should have 3 movies", function() {
+        client.assert(response.body.totalElements === 3, "Wrong number of movies for Emma Stone");
+    });
+%}
+
+### Check Denzel Washington's movies (should be 2)
+GET http://localhost:8080/api/movies?actorId=3&size=50
+
+> {%
+    client.test("Denzel Washington should have 2 movies", function() {
+        client.assert(response.body.totalElements === 2, "Wrong number of movies for Denzel Washington");
+    });
+%}
+
+### 4. Verify Movie Details
+### Check multi-genre movie (The Last Stand)
+GET http://localhost:8080/api/movies/1
+
+> {%
+    client.test("The Last Stand should have multiple genres", function() {
+        client.assert(response.body.genres.length === 2, "Wrong number of genres");
+        const genreNames = response.body.genres.map(g => g.name);
+        client.assert(genreNames.includes("Action"), "Missing Action genre");
+        client.assert(genreNames.includes("Thriller"), "Missing Thriller genre");
+    });
+%}
+
+### Check single-genre movie (Final Mission)
+GET http://localhost:8080/api/movies/20
+
+> {%
+    client.test("Final Mission should have single genre", function() {
+        client.assert(response.body.genres.length === 1, "Wrong number of genres");
+        client.assert(response.body.genres[0].name === "Action", "Wrong genre");
+    });
+%}
+
+### 5. Verify Statistics
+GET http://localhost:8080/api/statistics
+
+> {%
+    client.test("Statistics should match requirements", function() {
+        const stats = response.body;
+        // Basic counts
+        client.assert(stats.totalMovies === 20, "Wrong total movies");
+        client.assert(stats.totalActors === 15, "Wrong total actors");
+        client.assert(stats.totalGenres === 6, "Wrong total genres");
+
+        // Genre distribution
+        const genreCounts = Object.values(stats.moviesByGenre);
+        client.assert(Math.min(...genreCounts) >= 2, "Some genres have too few movies");
+
+        // Year range
+        const years = Object.keys(stats.moviesByYear).map(Number);
+        client.assert(Math.max(...years) - Math.min(...years) >= 19, "Insufficient year range");
+    });
+%}
+
+### 6. Verify Data Exports
+### Check JSON export
+GET http://localhost:8080/api/export/movies/json
+
+> {%
+    client.test("JSON export should contain all movies", function() {
+        client.assert(response.status === 200, "Export failed");
+    });
+%}
+
+### Check CSV export
+GET http://localhost:8080/api/export/movies/csv
+
+> {%
+    client.test("CSV export should contain all movies", function() {
+        client.assert(response.status === 200, "Export failed");
+    });
+%}

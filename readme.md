@@ -1,18 +1,17 @@
 <div align="center">
 
-# 🎬 Movie Database API
+# 📽️ Movie Database API
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-20-orange.svg)](https://www.oracle.com/java/)
 [![SQLite](https://img.shields.io/badge/SQLite-3.45.1-blue.svg)](https://www.sqlite.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 A modern, robust REST API for managing movie data with advanced querying capabilities.
 
-[Key Features](#features) •
-[Quick Start](#quick-start) •
-[API Reference](#api-reference) •
-[Documentation](#documentation)
+[Key Features](#-features) •
+[Quick Start](#-quick-start) •
+[API Reference](#-api-endpoints) •
+[Documentation](#-usage-examples)
 
 </div>
 
@@ -20,19 +19,37 @@ A modern, robust REST API for managing movie data with advanced querying capabil
 
 ## ✨ Features
 
-### Core Functionality
-- 🎯 Complete CRUD operations for movies, actors, and genres
-- 🔄 Smart relationship management between entities
-- 📱 RESTful API with intuitive endpoints
-- 🔍 Advanced search and filtering capabilities
-- 📊 Comprehensive data validation
+- **Rich Domain Model**
+    - Movies with multiple genres and actors
+    - Comprehensive actor profiles
+    - Genre categorization
+    - Flexible relationship management
 
-### Technical Highlights
-- 📦 Zero-config SQLite database
-- 🚀 Pagination for optimal performance
-- 💾 Efficient caching system
-- ⚡ Rate limiting protection
-- 🛡️ Robust error handling
+- **Advanced Querying**
+    - Full text search for movies and actors
+    - Filter by year, genre, or actor
+    - Pagination and sorting support
+    - Case-insensitive searching
+
+- **Data Export**
+    - Export to JSON and CSV formats
+    - Customizable data formatting
+    - Bulk data operations
+
+- **Statistics & Analytics**
+    - Movie distribution by year
+    - Genre popularity metrics
+    - Actor participation statistics
+    - Average duration analytics
+
+## 🛠️ Tech Stack
+
+- **Spring Boot 3.3.5** - Application framework
+- **SQLite** - Database
+- **JPA/Hibernate** - ORM and data persistence
+- **Jakarta Validation** - Data validation
+- **Jackson** - JSON processing
+- **Apache Commons CSV** - CSV processing
 
 ---
 
@@ -45,114 +62,112 @@ You'll need:
 - Maven 3.6+
 - Your favorite IDE (we recommend IntelliJ IDEA)
 
-### One-Minute Setup
+### Setup Steps
 
+1. Clone the repository
 ```bash
-# Clone the repo
-git clone https://github.com/pilves/movies-api
-
-# Navigate to project
+git clone https://github.com/yourusername/movies-api.git
 cd movies-api
+```
 
-# Build and run
-mvn spring-boot:run
+2. Build the project
+```bash
+./mvnw clean install
+```
+
+3. Run the application
+```bash
+./mvnw spring-boot:run
 ```
 
 That's it! The API is now running at `http://localhost:8080` 🎉
 
 ---
 
-## 🎯 API Reference
+## 🎯 API Endpoints
 
 ### Movies
+```
+GET    /api/movies              # List all movies (with pagination)
+POST   /api/movies              # Create a new movie
+GET    /api/movies/{id}         # Get movie details
+PATCH  /api/movies/{id}         # Update movie
+DELETE /api/movies/{id}         # Delete movie
+```
 
-Endpoint | Method | Description
----------|--------|------------
-`/api/movies` | GET | Get all movies
-`/api/movies/{id}` | GET | Get movie by ID
-`/api/movies` | POST | Create movie
-`/api/movies/{id}` | PATCH | Update movie
-`/api/movies/{id}` | DELETE | Delete movie
+### Actors
+```
+GET    /api/actors              # List all actors (with pagination)
+POST   /api/actors              # Create a new actor
+GET    /api/actors/{id}         # Get actor details
+PATCH  /api/actors/{id}         # Update actor
+DELETE /api/actors/{id}         # Delete actor
+```
 
-### Quick Examples
+### Genres
+```
+GET    /api/genres              # List all genres
+POST   /api/genres              # Create a new genre
+GET    /api/genres/{id}         # Get genre details
+PATCH  /api/genres/{id}         # Update genre
+DELETE /api/genres/{id}         # Delete genre
+```
 
+### Statistics & Export
+```
+GET    /api/statistics          # Get movie statistics
+GET    /api/export/movies/json  # Export movies as JSON
+GET    /api/export/movies/csv   # Export movies as CSV
+```
+
+## 📝 Usage Examples
+
+### Create a Movie
 ```http
-# Create a new movie
-POST http://localhost:8080/api/movies
+POST /api/movies
+Content-Type: application/json
+
 {
     "title": "Inception",
     "releaseYear": 2010,
     "duration": 148,
-    "genres": [{"id": 1}],
-    "actors": [{"id": 1}]
+    "genres": [
+        {"id": 1},
+        {"id": 3}
+    ],
+    "actors": [
+        {"id": 1},
+        {"id": 2}
+    ]
 }
-
-# Search movies by title
-GET http://localhost:8080/api/movies?title=inception
 ```
 
-[View Full API Documentation →](docs/API.md)
-
----
-
-## 🛠️ Advanced Features
-
-### 🔍 Smart Search
+### Search Movies
 ```http
-GET /api/movies?year=2020&genre=action&actor=1
+GET /api/movies?title=inception&page=0&size=10
 ```
 
-### 📊 Statistics
+### Get Statistics
 ```http
-GET /api/stats/movies/by-year
-GET /api/stats/actors/most-active
+GET /api/statistics
 ```
 
-### 📥 Data Export
-```http
-GET /api/export/movies?format=csv
-GET /api/export/movies?format=json
-```
+## 🔍 Advanced Features
 
----
+### Robust Error Handling
+- Comprehensive exception handling
+- Detailed error messages
+- Proper HTTP status codes
 
-## 🏗️ Project Structure
+### Data Validation
+- Input validation for all endpoints
+- Business rule validation
+- Relationship integrity checks
 
-```
-src/
-├── main/
-│   ├── java/
-│   │   └── com/example/moviesapi/
-│   │       ├── controller/
-│   │       ├── service/
-│   │       ├── repository/
-│   │       ├── entity/
-│   │       └── exception/
-│   └── resources/
-│       └── application.properties
-```
-
----
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-mvn test
-
-# Run specific test suite
-mvn test -Dtest=MovieControllerTest
-```
-
----
-
-## 📈 Performance
-
-- ⚡ Handles 1000+ requests/second
-- 🔄 Average response time < 100ms
-- 💾 Smart caching reduces database load
-
----
+### Performance Optimization
+- Paginated responses
+- Efficient database queries
+- Proper indexing
 
 ## 🤝 Contributing
 
@@ -162,8 +177,6 @@ mvn test -Dtest=MovieControllerTest
 4. Push to the branch (`git push origin feature/amazing`)
 5. Create a new Pull Request
 
----
-
 ## 🐛 Common Issues & Solutions
 
 Problem | Solution
@@ -171,8 +184,6 @@ Problem | Solution
 Database not creating | Check write permissions
 404 on all routes | Verify port 8080 is free
 Validation errors | Check request body format
-
----
 
 ## 📱 Example Requests
 
@@ -209,12 +220,6 @@ If you find this project useful, please give it a star. It helps others discover
 
 [Report Bug](https://github.com/pilves/movies-api/issues) •
 [Request Feature](https://github.com/pilves/movies-api/issues)
-
-</div>
-
----
-
-<div align="center">
 
 Made with ❤️ by Pilves
 

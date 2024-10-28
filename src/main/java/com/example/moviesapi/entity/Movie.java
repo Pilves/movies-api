@@ -1,5 +1,6 @@
 package com.example.moviesapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,6 +34,7 @@ public class Movie {
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
+    @JsonIgnoreProperties("movies")
     private Set<Genre> genres = new HashSet<>();
 
     @ManyToMany
@@ -41,6 +43,7 @@ public class Movie {
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id")
     )
+    @JsonIgnoreProperties("movies")
     private Set<Actor> actors = new HashSet<>();
 
     // Getters and Setters
