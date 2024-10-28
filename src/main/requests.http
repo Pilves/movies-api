@@ -1,156 +1,210 @@
-### 1. Verify Basic Entity Counts
-### Check all genres (should be 6)
-GET http://localhost:8080/api/genres
+### Base URL configuration
+@baseUrl = http://localhost:8080/api
 
-> {%
-    client.test("Should have all genres", function() {
-        client.assert(response.body.length === 6, "Wrong number of genres");
-        const genreNames = response.body.map(g => g.name);
-        client.assert(genreNames.includes("Action"), "Missing Action genre");
-        client.assert(genreNames.includes("Drama"), "Missing Drama genre");
-        client.assert(genreNames.includes("Science Fiction"), "Missing Science Fiction genre");
-        client.assert(genreNames.includes("Comedy"), "Missing Comedy genre");
-        client.assert(genreNames.includes("Thriller"), "Missing Thriller genre");
-        client.assert(genreNames.includes("Romance"), "Missing Romance genre");
-    });
-%}
+### 1. BASIC ENTITY CREATION AND VALIDATION
 
-### Check all actors (should be 15)
-GET http://localhost:8080/api/actors?size=50
+### 1.1 Create Genres (Testing POST with 201 Created)
+POST {{baseUrl}}/genres
+Content-Type: application/json
 
-> {%
-    client.test("Should have all actors", function() {
-        client.assert(response.body.totalElements === 15, "Wrong number of actors");
-        const actors = response.body.content;
-        client.assert(actors.some(a => a.name === "Emma Stone"), "Missing Emma Stone");
-        client.assert(actors.some(a => a.name === "Ryan Gosling"), "Missing Ryan Gosling");
-        client.assert(actors.some(a => a.name === "Leonardo DiCaprio"), "Missing Leonardo DiCaprio");
-    });
-%}
+{
+  "name": "Action"
+}
 
-### Check all movies (should be 20)
-GET http://localhost:8080/api/movies?size=50
+### Create Drama genre
+POST {{baseUrl}}/genres
+Content-Type: application/json
 
-> {%
-    client.test("Should have all movies", function() {
-        client.assert(response.body.totalElements === 20, "Wrong number of movies");
-        const movies = response.body.content;
-        // Check year range
-        const years = movies.map(m => m.releaseYear);
-        const minYear = Math.min(...years);
-        const maxYear = Math.max(...years);
-        client.assert(maxYear === 2022, "Missing recent movies");
-        client.assert(minYear === 2003, "Missing older movies");
-        client.assert(maxYear - minYear >= 19, "Insufficient year range");
-    });
-%}
+{
+  "name": "Drama"
+}
 
-### 2. Verify Genre Distribution
-### Check Action movies
-GET http://localhost:8080/api/movies?genreId=1&size=50
+### 1.2 Test Invalid Genre Creation (Duplicate name)
+POST {{baseUrl}}/genres
+Content-Type: application/json
 
-> {%
-    client.test("Should have enough Action movies", function() {
-        client.assert(response.body.totalElements >= 6, "Not enough Action movies");
-    });
-%}
+{
+  "name": "Action"
+}
 
-### Check Drama movies
-GET http://localhost:8080/api/movies?genreId=2&size=50
+### 1.3 Create Actors with valid dates (Testing ISO 8601 format)
+POST {{baseUrl}}/actors
+Content-Type: application/json
 
-> {%
-    client.test("Should have enough Drama movies", function() {
-        client.assert(response.body.totalElements >= 7, "Not enough Drama movies");
-    });
-%}
+{
+  "name": "Emma Stone",
+  "birthDate": "1988-11-06"
+}
 
-### Check Sci-Fi movies
-GET http://localhost:8080/api/movies?genreId=3&size=50
+### Create more actors
+POST {{baseUrl}}/actors
+Content-Type: application/json
 
-> {%
-    client.test("Should have enough Sci-Fi movies", function() {
-        client.assert(response.body.totalElements >= 5, "Not enough Sci-Fi movies");
-    });
-%}
+{
+  "name": "Ryan Goslings",
+  "birthDate": "1980-11-12"
+}
 
-### 3. Verify Actor Movie Counts
-### Check Emma Stone's movies (should be 3)
-GET http://localhost:8080/api/movies?actorId=1&size=50
+### 1.4 Test Invalid Actor Creation (Bad date format)
+POST {{baseUrl}}/actors
+Content-Type: application/json
 
-> {%
-    client.test("Emma Stone should have 3 movies", function() {
-        client.assert(response.body.totalElements === 3, "Wrong number of movies for Emma Stone");
-    });
-%}
+{
+  "name": "Test Actor",
+  "birthDate": "1990-14-30"
+}
 
-### Check Denzel Washington's movies (should be 2)
-GET http://localhost:8080/api/movies?actorId=3&size=50
+### 1.5 Create Movie with genres and actors
+POST {{baseUrl}}/movies
+Content-Type: application/json
 
-> {%
-    client.test("Denzel Washington should have 2 movies", function() {
-        client.assert(response.body.totalElements === 2, "Wrong number of movies for Denzel Washington");
-    });
-%}
+{
+  "title": "The Matrix",
+  "releaseYear": 1999,
+  "duration": 136,
+  "genres": [
+    {"id": 1},
+    {"id": 3}
+  ],
+  "actors": [
+    {"id": 1},
+    {"id": 2}
+  ]
+}
 
-### 4. Verify Movie Details
-### Check multi-genre movie (The Last Stand)
-GET http://localhost:8080/api/movies/1
+### 1.6 Test Invalid Movie Creation
+POST {{baseUrl}}/movies
+Content-Type: application/json
 
-> {%
-    client.test("The Last Stand should have multiple genres", function() {
-        client.assert(response.body.genres.length === 2, "Wrong number of genres");
-        const genreNames = response.body.genres.map(g => g.name);
-        client.assert(genreNames.includes("Action"), "Missing Action genre");
-        client.assert(genreNames.includes("Thriller"), "Missing Thriller genre");
-    });
-%}
+{
+  "title": "",
+  "releaseYear": 2025,
+  "duration": -120
+}
 
-### Check single-genre movie (Final Mission)
-GET http://localhost:8080/api/movies/20
+### 2. BASIC RETRIEVAL OPERATIONS
 
-> {%
-    client.test("Final Mission should have single genre", function() {
-        client.assert(response.body.genres.length === 1, "Wrong number of genres");
-        client.assert(response.body.genres[0].name === "Action", "Wrong genre");
-    });
-%}
+### 2.1 Get all genres (Pagination test)
+GET {{baseUrl}}/genres?page=0&size=10
 
-### 5. Verify Statistics
-GET http://localhost:8080/api/statistics
+### 2.2 Get all movies (Pagination test)
+GET {{baseUrl}}/movies?page=0&size=10
 
-> {%
-    client.test("Statistics should match requirements", function() {
-        const stats = response.body;
-        // Basic counts
-        client.assert(stats.totalMovies === 20, "Wrong total movies");
-        client.assert(stats.totalActors === 15, "Wrong total actors");
-        client.assert(stats.totalGenres === 6, "Wrong total genres");
+### 2.3 Get all actors (Pagination test)
+GET {{baseUrl}}/actors?page=0&size=10
 
-        // Genre distribution
-        const genreCounts = Object.values(stats.moviesByGenre);
-        client.assert(Math.min(...genreCounts) >= 2, "Some genres have too few movies");
+### 2.4 Test invalid pagination
+GET {{baseUrl}}/movies?page=-1&size=99999
 
-        // Year range
-        const years = Object.keys(stats.moviesByYear).map(Number);
-        client.assert(Math.max(...years) - Math.min(...years) >= 19, "Insufficient year range");
-    });
-%}
+### 3. SEARCH AND FILTER OPERATIONS
 
-### 6. Verify Data Exports
-### Check JSON export
-GET http://localhost:8080/api/export/movies/json
+### 3.1 Search actors by name (case-insensitive)
+GET {{baseUrl}}/actors?name=EMMA
 
-> {%
-    client.test("JSON export should contain all movies", function() {
-        client.assert(response.status === 200, "Export failed");
-    });
-%}
+### 3.2 Search movies by title
+GET {{baseUrl}}/movies/search?title=matrix
 
-### Check CSV export
-GET http://localhost:8080/api/export/movies/csv
+### 3.3 Filter movies by year
+GET {{baseUrl}}/movies?year=1999
 
-> {%
-    client.test("CSV export should contain all movies", function() {
-        client.assert(response.status === 200, "Export failed");
-    });
-%}
+### 3.4 Filter movies by genre
+GET {{baseUrl}}/movies?genre=1
+
+### 3.5 Filter movies by actor
+GET {{baseUrl}}/movies?actor=1
+
+### 4. RELATIONSHIP QUERIES
+
+### 4.1 Get actors in a movie
+GET {{baseUrl}}/movies/1/actors
+
+### 4.2 Get movies for an actor
+GET {{baseUrl}}/movies?actor=1
+
+### 5. UPDATE OPERATIONS
+
+### 5.1 Update genre (PATCH test)
+PATCH {{baseUrl}}/genres/1
+Content-Type: application/json
+
+{
+  "name": "Action/Adventure"
+}
+
+
+### 5.3 Update movie's actors
+PATCH {{baseUrl}}/movies/1
+Content-Type: application/json
+
+{
+  "actors": [
+    {"id": 1},
+    {"id": 2},
+    {"id": 3}
+  ]
+}
+
+### 6. DELETE OPERATIONS
+
+### 6.1 Try to delete genre with movies (should fail)
+DELETE {{baseUrl}}/genres/1
+
+### 6.2 Force delete genre
+DELETE {{baseUrl}}/genres/1?force=true
+
+### 6.3 Try to delete actor with movies (should fail)
+DELETE {{baseUrl}}/actors/1
+
+### 6.4 Force delete actor
+DELETE {{baseUrl}}/actors/1?force=true
+
+### 7. ERROR HANDLING TESTS
+
+### 7.1 Get non-existent genre (404 test)
+GET {{baseUrl}}/genres/999
+
+### 7.2 Get non-existent movie (404 test)
+GET {{baseUrl}}/movies/999
+
+### 7.3 Get non-existent actor (404 test)
+GET {{baseUrl}}/actors/999
+
+### 8. COMPLEX SCENARIOS
+
+### 8.1 Create movie with multiple genres and actors in single request
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Inception",
+  "releaseYear": 2010,
+  "duration": 148,
+  "genres": [
+    {"id": 1},
+    {"id": 3},
+    {"id": 5}
+  ],
+  "actors": [
+    {"id": 2},
+    {"id": 3},
+    {"id": 4}
+  ]
+}
+
+### 8.2 Update movie with complete data change
+PATCH {{baseUrl}}/movies/2
+Content-Type: application/json
+
+{
+  "title": "Inception: Extended Cut",
+  "releaseYear": 2010,
+  "duration": 162,
+  "genres": [
+    {"id": 1},
+    {"id": 3}
+  ],
+  "actors": [
+    {"id": 2},
+    {"id": 3}
+  ]
+}

@@ -1,69 +1,57 @@
 package com.example.moviesapi.service;
 
 import com.example.moviesapi.entity.Genre;
-import com.example.moviesapi.exception.ResourceAlreadyExistsException;
-import com.example.moviesapi.exception.ResourceNotFoundException;
+import com.example.moviesapi.exception.*;
 import com.example.moviesapi.repository.GenreRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Service
-@Transactional
 public class GenreService {
-
     private final GenreRepository genreRepository;
 
-    @Autowired
     public GenreService(GenreRepository genreRepository) {
         this.genreRepository = genreRepository;
     }
 
+    @Transactional
     public Genre createGenre(Genre genre) {
-        if (genreRepository.existsByNameIgnoreCase(genre.getName())) {
-            throw new ResourceAlreadyExistsException(
-                    "Genre with name '" + genre.getName() + "' already exists"
-            );
+        if (genre.getName() != null) {
+            String normalizedName = genre.getName().trim().toLowerCase();
+            if (genreRepository.existsByNameIgnoreCase(normalizedName)) {
+                throw new DuplicateResourceException("Genre already exists");
+            }
         }
-        return genreRepository.save(genre);
+        try {
+            return genreRepository.save(genre);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateResourceException("Genre already exists");
+        }
     }
 
-    public List<Genre> getAllGenres() {
-        return genreRepository.findAll();
+    public Page<Genre> getAllGenres(Pageable pageable) {
+        return genreRepository.findAll(pageable);
     }
 
     public Genre getGenreById(Long id) {
         return genreRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Genre not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Genre not found"));
     }
 
     public Genre updateGenre(Long id, Genre genreDetails) {
         Genre genre = getGenreById(id);
-
-        // Check if new name conflicts with existing genre (excluding current genre)
-        if (!genre.getName().equalsIgnoreCase(genreDetails.getName()) &&
-                genreRepository.existsByNameIgnoreCase(genreDetails.getName())) {
-            throw new ResourceAlreadyExistsException(
-                    "Genre with name '" + genreDetails.getName() + "' already exists"
-            );
-        }
-
         genre.setName(genreDetails.getName());
         return genreRepository.save(genre);
     }
 
     public void deleteGenre(Long id, boolean force) {
         Genre genre = getGenreById(id);
-
         if (!force && !genre.getMovies().isEmpty()) {
-            throw new IllegalStateException(
-                    "Cannot delete genre '" + genre.getName() +
-                            "' because it has " + genre.getMovies().size() + " associated movies"
-            );
+            throw new IllegalStateException("Cannot delete genre with associated movies");
         }
-
-        genreRepository.deleteById(id);
+        genreRepository.delete(genre);
     }
 }

@@ -1,0 +1,552 @@
+### Base URLs for different environments
+@baseUrl = http://localhost:8080/api
+
+### Genres (6 total)
+POST {{baseUrl}}/genres
+Content-Type: application/json
+
+{
+  "name": "Action"
+}
+
+###
+POST {{baseUrl}}/genres
+Content-Type: application/json
+
+{
+  "name": "Drama"
+}
+
+###
+POST {{baseUrl}}/genres
+Content-Type: application/json
+
+{
+  "name": "Science Fiction"
+}
+
+###
+POST {{baseUrl}}/genres
+Content-Type: application/json
+
+{
+  "name": "Comedy"
+}
+
+###
+POST {{baseUrl}}/genres
+Content-Type: application/json
+
+{
+  "name": "Thriller"
+}
+
+###
+POST {{baseUrl}}/genres
+Content-Type: application/json
+
+{
+  "name": "Romance"
+}
+
+###actors
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Meryl Streep",
+  "birthDate": "1949-06-22"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Denzel Washington",
+  "birthDate": "1954-12-28"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Leonardo DiCaprio",
+  "birthDate": "1974-11-11"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Tom Hardy",
+  "birthDate": "1977-09-15"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Ryan Gosling",
+  "birthDate": "1980-11-12"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Chris Evans",
+  "birthDate": "1981-06-13"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Emily Blunt",
+  "birthDate": "1983-02-23"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Scarlett Johansson",
+  "birthDate": "1984-11-22"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Michael B. Jordan",
+  "birthDate": "1987-02-09"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Emma Stone",
+  "birthDate": "1988-11-06"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Margot Robbie",
+  "birthDate": "1990-07-02"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Jennifer Lawrence",
+  "birthDate": "1990-08-15"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Idris Elba",
+  "birthDate": "1972-09-06"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Viola Davis",
+  "birthDate": "1965-08-11"
+}
+
+###
+POST {{baseUrl}}/actors
+Content-Type: application/json
+
+{
+  "name": "Chadwick Boseman",
+  "birthDate": "1976-11-29"
+}
+
+###movies
+### 1. The Last Stand (2023)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "The Last Stand",
+  "releaseYear": 2023,
+  "duration": 135,
+  "genres": [
+    {"id": 1},
+    {"id": 5}
+  ],
+  "actors": [
+    {"id": 2},
+    {"id": 6}
+  ]
+}
+
+### 2. Eternal Light (2022)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Eternal Light",
+  "releaseYear": 2022,
+  "duration": 142,
+  "genres": [
+    {"id": 2},
+    {"id": 3}
+  ],
+  "actors": [
+    {"id": 3},
+    {"id": 12}
+  ]
+}
+
+### 3. Dreams of Tomorrow (2021)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Dreams of Tomorrow",
+  "releaseYear": 2021,
+  "duration": 128,
+  "genres": [
+    {"id": 3},
+    {"id": 2}
+  ],
+  "actors": [
+    {"id": 8},
+    {"id": 9},
+    {"id": 12}
+  ]
+}
+
+### 4. City Lights (2020)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "City Lights",
+  "releaseYear": 2020,
+  "duration": 118,
+  "genres": [
+    {"id": 4},
+    {"id": 6}
+  ],
+  "actors": [
+    {"id": 10},
+    {"id": 5}
+  ]
+}
+
+### 5. Dark Waters (2019)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Dark Waters",
+  "releaseYear": 2019,
+  "duration": 125,
+  "genres": [
+    {"id": 5}
+  ],
+  "actors": [
+    {"id": 4},
+    {"id": 13}
+  ]
+}
+
+### 6. Love in Paris (2018)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Love in Paris",
+  "releaseYear": 2018,
+  "duration": 128,
+  "genres": [
+    {"id": 6},
+    {"id": 2}
+  ],
+  "actors": [
+    {"id": 5}
+  ]
+}
+
+### 7. Future World (2017)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Future World",
+  "releaseYear": 2017,
+  "duration": 155,
+  "genres": [
+    {"id": 3}
+  ],
+  "actors": [
+    {"id": 8},
+    {"id": 12}
+  ]
+}
+
+### 8. The Funny Side (2016)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "The Funny Side",
+  "releaseYear": 2016,
+  "duration": 110,
+  "genres": [
+    {"id": 4}
+  ],
+  "actors": [
+    {"id": 10},
+    {"id": 11}
+  ]
+}
+
+### 9. Deep Waters (2015)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Deep Waters",
+  "releaseYear": 2015,
+  "duration": 138,
+  "genres": [
+    {"id": 2},
+    {"id": 5}
+  ],
+  "actors": [
+    {"id": 7},
+    {"id": 3}
+  ]
+}
+
+### 10. Time Travelers (2014)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Time Travelers",
+  "releaseYear": 2014,
+  "duration": 145,
+  "genres": [
+    {"id": 1},
+    {"id": 3}
+  ],
+  "actors": [
+    {"id": 12},
+    {"id": 15}
+  ]
+}
+
+### 11. Heart of Gold (2013)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Heart of Gold",
+  "releaseYear": 2013,
+  "duration": 122,
+  "genres": [
+    {"id": 2}
+  ],
+  "actors": [
+    {"id": 14},
+    {"id": 1}
+  ]
+}
+
+### 12. The Last Hero (2012)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "The Last Hero",
+  "releaseYear": 2012,
+  "duration": 140,
+  "genres": [
+    {"id": 1},
+    {"id": 2}
+  ],
+  "actors": [
+    {"id": 15},
+    {"id": 5}
+  ]
+}
+
+### 13. Laugh Out Loud (2011)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Laugh Out Loud",
+  "releaseYear": 2011,
+  "duration": 105,
+  "genres": [
+    {"id": 4}
+  ],
+  "actors": [
+    {"id": 11}
+  ]
+}
+
+### 14. Digital Dreams (2010)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Digital Dreams",
+  "releaseYear": 2010,
+  "duration": 132,
+  "genres": [
+    {"id": 3},
+    {"id": 5}
+  ],
+  "actors": [
+    {"id": 8},
+    {"id": 9}
+  ]
+}
+
+### 15. Sweet Romance (2009)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Sweet Romance",
+  "releaseYear": 2009,
+  "duration": 115,
+  "genres": [
+    {"id": 4},
+    {"id": 6}
+  ],
+  "actors": [
+    {"id": 10},
+    {"id": 7}
+  ]
+}
+
+### 16. The Chase (2008)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "The Chase",
+  "releaseYear": 2008,
+  "duration": 130,
+  "genres": [
+    {"id": 1},
+    {"id": 5}
+  ],
+  "actors": [
+    {"id": 4},
+    {"id": 5}
+  ]
+}
+
+### 17. Mind Games (2007)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Mind Games",
+  "releaseYear": 2007,
+  "duration": 128,
+  "genres": [
+    {"id": 2},
+    {"id": 5}
+  ],
+  "actors": [
+    {"id": 14},
+    {"id": 3}
+  ]
+}
+
+### 18. Space Warriors (2006)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Space Warriors",
+  "releaseYear": 2006,
+  "duration": 142,
+  "genres": [
+    {"id": 1},
+    {"id": 3}
+  ],
+  "actors": [
+    {"id": 8},
+    {"id": 6}
+  ]
+}
+
+### 19. Love Letters (2005)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Love Letters",
+  "releaseYear": 2005,
+  "duration": 118,
+  "genres": [
+    {"id": 2},
+    {"id": 6}
+  ],
+  "actors": [
+    {"id": 1}
+  ]
+}
+
+### 20. Final Mission (2004)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Final Mission",
+  "releaseYear": 2004,
+  "duration": 135,
+  "genres": [
+    {"id": 1}
+  ],
+  "actors": [
+    {"id": 9},
+    {"id": 2}
+  ]
+}
+
+### Verify relationships
+GET {{baseUrl}}/movies/1/actors
+###
+GET {{baseUrl}}/actors/1/movies
+###
+GET {{baseUrl}}/genres/1/details
+
+### Verify data distribution
+GET {{baseUrl}}/movies
+###
+GET {{baseUrl}}/actors
+###
+GET {{baseUrl}}/genres

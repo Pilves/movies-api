@@ -1,66 +1,64 @@
 package com.example.moviesapi.controller;
 
-import com.example.moviesapi.dto.PaginationResponse;
+import com.example.moviesapi.dto.ActorDTO;
+import com.example.moviesapi.dto.ActorSummaryDTO;
 import com.example.moviesapi.entity.Actor;
 import com.example.moviesapi.service.ActorService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.moviesapi.mapper.ActorMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/actors")
 public class ActorController {
-
     private final ActorService actorService;
+    private final ActorMapper actorMapper;
 
-    @Autowired
-    public ActorController(ActorService actorService) {
+    public ActorController(ActorService actorService, ActorMapper actorMapper) {
         this.actorService = actorService;
+        this.actorMapper = actorMapper;
     }
 
     @PostMapping
-    public ResponseEntity<Actor> createActor(@Valid @RequestBody Actor actor) {
-        Actor createdActor = actorService.createActor(actor);
-        return new ResponseEntity<>(createdActor, HttpStatus.CREATED);
+    public ActorDTO createActor(@RequestBody Actor actor) {
+        return actorMapper.toDTO(actorService.createActor(actor));
     }
 
     @GetMapping
-    public ResponseEntity<PaginationResponse<Actor>> getAllActors(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String name) {
-
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Actor> actorPage = name != null ?
-                actorService.searchActorsByName(name, pageRequest) :
-                actorService.getAllActors(pageRequest);
-
-        return ResponseEntity.ok(new PaginationResponse<>(actorPage));
+    public ResponseEntity<Page<ActorSummaryDTO>> getAllActors(@RequestParam(required = false) String name, Pageable pageable) {
+        Page<Actor> actorPage = name != null ? actorService.getActorsByName(name, pageable) : actorService.getAllActors(pageable);
+        Page<ActorSummaryDTO> summaryPage = actorPage.map(this::toSummaryDTO);
+        return ResponseEntity.ok(summaryPage);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Actor> getActorById(@PathVariable Long id) {
-        Actor actor = actorService.getActorById(id);
-        return ResponseEntity.ok(actor);
+    public ResponseEntity<ActorSummaryDTO> getActorById(@PathVariable Long id) {
+        return ResponseEntity.ok(toSummaryDTO(actorService.getActorById(id)));
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<ActorDTO> getActorDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(actorMapper.toDTO(actorService.getActorById(id)));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Actor> updateActor(
-            @PathVariable Long id,
-            @Valid @RequestBody Actor actorDetails) {
-        Actor updatedActor = actorService.updateActor(id, actorDetails);
-        return ResponseEntity.ok(updatedActor);
+    public ResponseEntity<ActorDTO> updateActor(@PathVariable Long id, @RequestBody Actor actorDetails) {
+        return ResponseEntity.ok(actorMapper.toDTO(actorService.updateActor(id, actorDetails)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteActor(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "false") boolean force) {
+    public ResponseEntity<Void> deleteActor(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean force) {
         actorService.deleteActor(id, force);
         return ResponseEntity.noContent().build();
+    }
+
+    private ActorSummaryDTO toSummaryDTO(Actor actor) {
+        ActorSummaryDTO dto = new ActorSummaryDTO();
+        dto.setId(actor.getId());
+        dto.setName(actor.getName());
+        dto.setBirthDate(String.valueOf(actor.getBirthDate()));
+        return dto;
     }
 }

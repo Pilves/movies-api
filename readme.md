@@ -1,226 +1,330 @@
 <div align="center">
 
-# 📽️ Movie Database API
+# 🎬 Movie Database API
 
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Java](https://img.shields.io/badge/Java-20-orange.svg)](https://www.oracle.com/java/)
+A modern, high-performance REST API for managing movie collections, built with Spring Boot 3.
+
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
 [![SQLite](https://img.shields.io/badge/SQLite-3.45.1-blue.svg)](https://www.sqlite.org/)
-
-A modern, robust REST API for managing movie data with advanced querying capabilities.
-
-[Key Features](#-features) •
-[Quick Start](#-quick-start) •
-[API Reference](#-api-endpoints) •
-[Documentation](#-usage-examples)
 
 </div>
 
----
+## 📑 Table of Contents
+
+- [Overview](#-overview)
+- [Features](#-features)
+- [Installation](#-installation)
+- [API Reference](#-api-reference)
+- [Data Models](#-data-models)
+- [Error Handling](#-error-handling)
+- [Best Practices](#-best-practices)
+
+## 🌟 Overview
+
+The Movie Database API provides a robust solution for managing movie collections with support for complex relationships between movies, actors, and genres. Built for performance and scalability, it offers comprehensive CRUD operations, advanced searching, and intelligent pagination.
 
 ## ✨ Features
 
-- **Rich Domain Model**
-    - Movies with multiple genres and actors
-    - Comprehensive actor profiles
-    - Genre categorization
-    - Flexible relationship management
+- **📚 Complete CRUD Operations** for movies, actors, and genres
+- **🔍 Advanced Search Capabilities** with case-insensitive matching
+- **📄 Smart Pagination** with configurable page sizes
+- **🔒 Data Validation** and error handling
+- **🤝 Many-to-Many Relationship** management
+- **🚀 High Performance** with optimized queries
 
-- **Advanced Querying**
-    - Full text search for movies and actors
-    - Filter by year, genre, or actor
-    - Pagination and sorting support
-    - Case-insensitive searching
-
-- **Data Export**
-    - Export to JSON and CSV formats
-    - Customizable data formatting
-    - Bulk data operations
-
-- **Statistics & Analytics**
-    - Movie distribution by year
-    - Genre popularity metrics
-    - Actor participation statistics
-    - Average duration analytics
-
-## 🛠️ Tech Stack
-
-- **Spring Boot 3.3.5** - Application framework
-- **SQLite** - Database
-- **JPA/Hibernate** - ORM and data persistence
-- **Jakarta Validation** - Data validation
-- **Jackson** - JSON processing
-- **Apache Commons CSV** - CSV processing
-
----
-
-## 🚀 Quick Start
+## 🛠 Installation
 
 ### Prerequisites
 
-You'll need:
-- Java 20+ 
-- Maven 3.6+
-- Your favorite IDE (we recommend IntelliJ IDEA)
-
-### Setup Steps
-
-1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/movies-api.git
+Java 17+
+Maven 3.6+
+SQLite 3.45.1+
+```
+
+### Quick Start
+
+1️⃣ Clone the repository:
+```bash
+git clone https://github.com/pilves/movies-api.git
 cd movies-api
 ```
 
-2. Build the project
+2️⃣ Build the project:
 ```bash
-./mvnw clean install
+mvn clean install
 ```
 
-3. Run the application
+3️⃣ Run the application:
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
-That's it! The API is now running at `http://localhost:8080` 🎉
+The API will be available at `http://localhost:8080/api`
 
----
+## 📚 API Reference
 
-## 🎯 API Endpoints
+### 🎬 Movies API
 
-### Movies
-```
-GET    /api/movies              # List all movies (with pagination)
-POST   /api/movies              # Create a new movie
-GET    /api/movies/{id}         # Get movie details
-PATCH  /api/movies/{id}         # Update movie
-DELETE /api/movies/{id}         # Delete movie
-```
-
-### Actors
-```
-GET    /api/actors              # List all actors (with pagination)
-POST   /api/actors              # Create a new actor
-GET    /api/actors/{id}         # Get actor details
-PATCH  /api/actors/{id}         # Update actor
-DELETE /api/actors/{id}         # Delete actor
-```
-
-### Genres
-```
-GET    /api/genres              # List all genres
-POST   /api/genres              # Create a new genre
-GET    /api/genres/{id}         # Get genre details
-PATCH  /api/genres/{id}         # Update genre
-DELETE /api/genres/{id}         # Delete genre
-```
-
-### Statistics & Export
-```
-GET    /api/statistics          # Get movie statistics
-GET    /api/export/movies/json  # Export movies as JSON
-GET    /api/export/movies/csv   # Export movies as CSV
-```
-
-## 📝 Usage Examples
-
-### Create a Movie
+#### Create Movie
 ```http
 POST /api/movies
 Content-Type: application/json
 
 {
-    "title": "Inception",
-    "releaseYear": 2010,
-    "duration": 148,
-    "genres": [
-        {"id": 1},
-        {"id": 3}
-    ],
-    "actors": [
-        {"id": 1},
-        {"id": 2}
-    ]
+  "title": "Time Travelers",
+  "releaseYear": 2014,
+  "duration": 145,
+  "genres": [
+    {"id": 1},  // Action
+    {"id": 3}   // Science Fiction
+  ],
+  "actors": [
+    {"id": 11}, // Jennifer Lawrence
+    {"id": 8}   // Chadwick Boseman
+  ]
+}
+
+Response: 201 Created
+{
+  "id": 9,
+  "title": "Time Travelers",
+  "releaseYear": 2014,
+  "duration": 145,
+  "genres": [...],
+  "actors": [...]
 }
 ```
 
-### Search Movies
+#### Get Movies (Paginated)
 ```http
-GET /api/movies?title=inception&page=0&size=10
+GET /api/movies?page=0&size=10
+
+Response: 200 OK
+{
+  "content": [
+    {
+      "id": 1,
+      "title": "The Last Stand",
+      "releaseYear": 2022,
+      "duration": 135
+    },
+    {
+      "id": 2,
+      "title": "Eternal Light",
+      "releaseYear": 2021,
+      "duration": 142
+    },
+    // ... more movies
+  ],
+  "totalPages": 2,
+  "totalElements": 20,
+  "size": 10,
+  "number": 0
+}
 ```
 
-### Get Statistics
+#### Get Movie Details
 ```http
-GET /api/statistics
+GET /api/movies/2/details
+
+Response: 200 OK
+{
+  "id": 2,
+  "title": "Eternal Light",
+  "releaseYear": 2021,
+  "duration": 142,
+  "genres": [
+    {
+      "id": 2,
+      "name": "Drama"
+    },
+    {
+      "id": 3,
+      "name": "Science Fiction"
+    }
+  ],
+  "actors": [
+    {
+      "id": 11,
+      "name": "Jennifer Lawrence",
+      "birthDate": "1990-08-15"
+    },
+    {
+      "id": 5,
+      "name": "Leonardo DiCaprio",
+      "birthDate": "1974-11-11"
+    }
+  ]
+}
 ```
 
-## 🔍 Advanced Features
+### 🎭 Actors API
 
-### Robust Error Handling
-- Comprehensive exception handling
-- Detailed error messages
-- Proper HTTP status codes
+#### Get Actor Details
+```http
+GET /api/actors/1/details
 
-### Data Validation
-- Input validation for all endpoints
-- Business rule validation
-- Relationship integrity checks
-
-### Performance Optimization
-- Paginated responses
-- Efficient database queries
-- Proper indexing
-
-## 🤝 Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b feature/amazing`)
-3. Commit your changes (`git commit -am 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing`)
-5. Create a new Pull Request
-
-## 🐛 Common Issues & Solutions
-
-Problem | Solution
---------|----------
-Database not creating | Check write permissions
-404 on all routes | Verify port 8080 is free
-Validation errors | Check request body format
-
-## 📱 Example Requests
-
-### Using cURL
-```bash
-# Get all movies
-curl http://localhost:8080/api/movies
-
-# Create a genre
-curl -X POST http://localhost:8080/api/genres \
-     -H "Content-Type: application/json" \
-     -d '{"name": "Action"}'
+Response: 200 OK
+{
+  "id": 1,
+  "name": "Emma Stone",
+  "birthDate": "1988-11-06",
+  "movies": [
+    {
+      "id": 3,
+      "title": "City of Dreams",
+      "releaseYear": 2020,
+      "duration": 118,
+      "genreNames": ["Comedy", "Romance"]
+    },
+    {
+      "id": 7,
+      "title": "The Funny Side",
+      "releaseYear": 2016,
+      "duration": 110,
+      "genreNames": ["Comedy"]
+    },
+    {
+      "id": 14,
+      "title": "Sweet Romance",
+      "releaseYear": 2009,
+      "duration": 115,
+      "genreNames": ["Comedy", "Romance"]
+    }
+  ]
+}
 ```
 
-### Using HTTPie
-```bash
-# Get all actors
-http GET localhost:8080/api/actors
+#### Search Actors by Name
+```http
+GET /api/actors?name=emma&page=0&size=10
 
-# Create movie
-http POST localhost:8080/api/movies \
-    title="The Matrix" \
-    releaseYear:=1999 \
-    duration:=136
+Response: 200 OK
+{
+  "content": [
+    {
+      "id": 1,
+      "name": "Emma Stone",
+      "birthDate": "1988-11-06"
+    }
+  ],
+  "totalElements": 1,
+  "totalPages": 1
+}
 ```
+
+### 🎪 Genres API
+
+#### Get All Genres
+```http
+GET /api/genres?page=0&size=10
+
+Response: 200 OK
+{
+  "content": [
+    {
+      "id": 1,
+      "name": "Action"
+    },
+    {
+      "id": 2,
+      "name": "Drama"
+    },
+    {
+      "id": 3,
+      "name": "Science Fiction"
+    },
+    {
+      "id": 4,
+      "name": "Comedy"
+    },
+    {
+      "id": 5,
+      "name": "Thriller"
+    },
+    {
+      "id": 6,
+      "name": "Romance"
+    }
+  ],
+  "totalElements": 6,
+  "totalPages": 1
+}
+```
+
+## 📊 Data Models
+
+### Movie
+```json
+{
+  "id": "Long",
+  "title": "String (required)",
+  "releaseYear": "Integer (required)",
+  "duration": "Integer (required)",
+  "genres": "Set<Genre>",
+  "actors": "Set<Actor>"
+}
+```
+
+### Actor
+```json
+{
+  "id": "Long",
+  "name": "String (required)",
+  "birthDate": "LocalDate (required, past)",
+  "movies": "Set<Movie>"
+}
+```
+
+### Genre
+```json
+{
+  "id": "Long",
+  "name": "String (required)",
+  "movies": "Set<Movie>"
+}
+```
+
+## ❌ Error Handling
+
+The API uses standard HTTP status codes and provides detailed error messages:
+
+```json
+{
+  "error": "Resource not found",
+  "message": "Movie with id 999 not found",
+  "timestamp": "2024-10-28T14:59:15.146+00:00",
+  "path": "/api/movies/999"
+}
+```
+
+### Common Status Codes
+- `200` - Success
+- `201` - Created
+- `204` - No Content
+- `400` - Bad Request
+- `404` - Not Found
+- `500` - Server Error
+
+## 💡 Best Practices
+
+1. Use pagination for large datasets
+2. Include relevant relationships in detail endpoints
+3. Use force parameter for deleting related entities
+4. Keep page sizes reasonable (max 100)
+5. Use case-insensitive search for better user experience
+
+## 🔒 Security
+
+- Input validation on all endpoints
+- Pagination limits to prevent DoS
+- Data integrity checks
+- Safe deletion handling
+
 
 ---
-
 <div align="center">
-
-## 🌟 Star us on GitHub
-
-If you find this project useful, please give it a star. It helps others discover this project.
-
-[Report Bug](https://github.com/pilves/movies-api/issues) •
-[Request Feature](https://github.com/pilves/movies-api/issues)
-
 Made with ❤️ by Pilves
-
 </div>

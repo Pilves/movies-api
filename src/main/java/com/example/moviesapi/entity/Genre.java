@@ -1,46 +1,35 @@
 package com.example.moviesapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import java.util.HashSet;
+import jakarta.validation.constraints.*;
+import lombok.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "genres")
+@Getter @Setter
+@Table(name = "genres", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class Genre {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank(message = "Genre name is required")
-    @Size(min = 2, max = 50, message = "Genre name must be between 2 and 50 characters")
-    @Column(unique = true)
+    @NotBlank @Pattern(regexp = "^[A-Z][a-zA-Z /-]*$") @Column(unique = true)
     private String name;
-
     @ManyToMany(mappedBy = "genres")
     @JsonIgnoreProperties("genres")
-    private Set<Movie> movies = new HashSet<>();
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Set<Movie> movies;
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<Movie> getMovies() {
-        return movies;
-    }
-
-    public void setMovies(Set<Movie> movies) {
-        this.movies = movies;
+    @PrePersist @PreUpdate
+    private void prepareName() {
+        if (name != null) {
+            name = name.trim().replaceAll("\\s+", " ");
+            name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+        }
     }
 }
