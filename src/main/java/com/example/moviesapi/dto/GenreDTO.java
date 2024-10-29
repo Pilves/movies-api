@@ -7,13 +7,5 @@ import java.util.Set;
 public class GenreDTO {
     private Long id;
     private String name;
-    private Set<MovieSummaryDTO> movies;
-
-    @Data
-    public static class MovieSummaryDTO {
-        private Long id;
-        private String title;
-        private Integer releaseYear;
-        private Integer duration;
-    }
+    private Set<MovieDTO> movies;
 }

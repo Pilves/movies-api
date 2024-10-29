@@ -1,17 +1,17 @@
 package com.example.moviesapi.controller;
 
-import com.example.moviesapi.config.PaginationValidator;
-import com.example.moviesapi.dto.ActorSummaryDTO;
+import com.example.moviesapi.dto.ActorDTO;
 import com.example.moviesapi.dto.MovieDTO;
-import com.example.moviesapi.dto.MovieSummaryDTO;
 import com.example.moviesapi.entity.Movie;
 import com.example.moviesapi.service.MovieService;
 import com.example.moviesapi.mapper.MovieMapper;
+import com.example.moviesapi.mapper.ActorMapper;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.moviesapi.exception.ApiException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,84 +21,98 @@ import java.util.stream.Collectors;
 public class MovieController {
     private final MovieService movieService;
     private final MovieMapper movieMapper;
-    private final PaginationValidator paginationValidator;
+    private final ActorMapper actorMapper;
 
-    public MovieController(MovieService movieService, MovieMapper movieMapper, PaginationValidator paginationValidator) {
+    public MovieController(MovieService movieService, MovieMapper movieMapper,
+                           ActorMapper actorMapper) {
         this.movieService = movieService;
         this.movieMapper = movieMapper;
-        this.paginationValidator = paginationValidator;
+        this.actorMapper = actorMapper;
     }
 
     @GetMapping
-    public ResponseEntity<Page<MovieSummaryDTO>> getAllMovies(
+    public ResponseEntity<Page<MovieDTO>> getAllMovies(
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Long genre,
-            @RequestParam(required = false) Long actor,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) String actor,
+            @RequestParam(defaultValue = "false") boolean includeRelations,
             Pageable pageable) {
-        paginationValidator.validatePageable(pageable);
         Page<Movie> moviePage;
 
-        if (year != null) moviePage = movieService.getMoviesByReleaseYear(year, pageable);
-        else if (genre != null) moviePage = movieService.getMoviesByGenreId(genre, pageable);
-        else if (actor != null) moviePage = movieService.getMoviesByActorId(actor, pageable);
-        else moviePage = movieService.getAllMovies(pageable);
+        try {
+            if (year != null) {
+                moviePage = movieService.getMoviesByReleaseYear(year, pageable);
+            } else if (genre != null) {
+                Long genreId = Long.parseLong(genre);
+                moviePage = movieService.getMoviesByGenreId(genreId, pageable);
+            } else if (actor != null) {
+                Long actorId = Long.parseLong(actor);
+                moviePage = movieService.getMoviesByActorId(actorId, pageable);
+            } else {
+                moviePage = movieService.getAllMovies(pageable);
+            }
 
-        return ResponseEntity.ok(moviePage.map(this::toSummaryDTO));
+            return ResponseEntity.ok(moviePage.map(movie ->
+                    movieMapper.toDTO(movie, includeRelations)));
+
+        } catch (NumberFormatException e) {
+            throw ApiException.invalidRequest("Invalid ID format for genre or actor");
+        }
     }
 
     @PostMapping
     public ResponseEntity<MovieDTO> createMovie(@Valid @RequestBody Movie movie) {
-        return ResponseEntity.status(201).body(movieMapper.toDTO(movieService.createMovie(movie)));
+        Movie createdMovie = movieService.createMovie(movie);
+        return ResponseEntity.status(201)
+                .body(movieMapper.toDTO(createdMovie, true));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MovieSummaryDTO> getMovieById(@PathVariable Long id) {
-        return ResponseEntity.ok(toSummaryDTO(movieService.getMovieById(id)));
+    public ResponseEntity<MovieDTO> getMovieById(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean includeRelations) {
+        Movie movie = movieService.getMovieById(id);
+        return ResponseEntity.ok(movieMapper.toDTO(movie, includeRelations));
     }
 
     @GetMapping("/{id}/details")
     public ResponseEntity<MovieDTO> getMovieDetails(@PathVariable Long id) {
-        return ResponseEntity.ok(movieMapper.toDTO(movieService.getMovieById(id)));
+        Movie movie = movieService.getMovieById(id);
+        return ResponseEntity.ok(movieMapper.toDTO(movie, true));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<MovieDTO> updateMovie(@PathVariable Long id, @RequestBody Movie movieDetails) {
-        return ResponseEntity.ok(movieMapper.toDTO(movieService.updateMovie(id, movieDetails)));
+    public ResponseEntity<MovieDTO> updateMovie(
+            @PathVariable Long id,
+            @RequestBody MovieDTO movieDetails) {
+        Movie updatedMovie = movieService.updateMovie(id, movieDetails);
+        return ResponseEntity.ok(movieMapper.toDTO(updatedMovie, true));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
-        movieService.deleteMovie(id);
+    public ResponseEntity<Void> deleteMovie(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean force) {
+        movieService.deleteMovie(id, force);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<MovieSummaryDTO>> searchMovies(
+    public ResponseEntity<Page<MovieDTO>> searchMovies(
             @RequestParam String title,
+            @RequestParam(defaultValue = "false") boolean includeRelations,
             Pageable pageable) {
-        paginationValidator.validatePageable(pageable);
-        return ResponseEntity.ok(movieService.searchMoviesByTitle(title, pageable).map(this::toSummaryDTO));
+        Page<Movie> moviePage = movieService.searchMoviesByTitle(title, pageable);
+        return ResponseEntity.ok(moviePage.map(movie ->
+                movieMapper.toDTO(movie, includeRelations)));
     }
 
     @GetMapping("/{id}/actors")
-    public ResponseEntity<List<ActorSummaryDTO>> getActorsInMovie(@PathVariable Long id) {
-        return ResponseEntity.ok(movieService.getMovieById(id).getActors().stream()
-                .map(actor -> {
-                    ActorSummaryDTO dto = new ActorSummaryDTO();
-                    dto.setId(actor.getId());
-                    dto.setName(actor.getName());
-                    dto.setBirthDate(actor.getBirthDate() != null ? actor.getBirthDate().toString() : null);
-                    return dto;
-                })
-                .collect(Collectors.toList()));
-    }
-
-    private MovieSummaryDTO toSummaryDTO(Movie movie) {
-        MovieSummaryDTO summaryDTO = new MovieSummaryDTO();
-        summaryDTO.setId(movie.getId());
-        summaryDTO.setTitle(movie.getTitle());
-        summaryDTO.setReleaseYear(movie.getReleaseYear());
-        summaryDTO.setDuration(movie.getDuration());
-        return summaryDTO;
+    public ResponseEntity<List<ActorDTO>> getActorsInMovie(@PathVariable Long id) {
+        Movie movie = movieService.getMovieById(id);
+        List<ActorDTO> actors = movie.getActors().stream()
+                .map(actor -> actorMapper.toDTO(actor, false))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(actors);
     }
 }

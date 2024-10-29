@@ -9,19 +9,6 @@ public class MovieDTO {
     private String title;
     private Integer releaseYear;
     private Integer duration;
-    private Set<GenreSummaryDTO> genres;
-    private Set<ActorSummaryDTO> actors;
-
-    @Data
-    public static class GenreSummaryDTO {
-        private Long id;
-        private String name;
-    }
-
-    @Data
-    public static class ActorSummaryDTO {
-        private Long id;
-        private String name;
-        private String birthDate;
-    }
+    private Set<GenreDTO> genres;
+    private Set<ActorDTO> actors;
 }

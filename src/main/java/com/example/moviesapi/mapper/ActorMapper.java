@@ -12,17 +12,19 @@ import java.util.stream.Collectors;
 @Component
 public class ActorMapper {
 
-    public ActorDTO toDTO(Actor actor) {
+    public ActorDTO toDTO(Actor actor, boolean includeMovies) {
         ActorDTO dto = new ActorDTO();
         dto.setId(actor.getId());
         dto.setName(actor.getName());
         dto.setBirthDate(actor.getBirthDate());
 
-        dto.setMovies(Optional.ofNullable(actor.getMovies())
-                .map(movies -> movies.stream()
-                        .map(this::toMovieSummary)
-                        .collect(Collectors.toSet()))
-                .orElse(Collections.emptySet()));
+        if (includeMovies) {
+            dto.setMovies(Optional.ofNullable(actor.getMovies())
+                    .map(movies -> movies.stream()
+                            .map(this::toMovieSummary)
+                            .collect(Collectors.toSet()))
+                    .orElse(Collections.emptySet()));
+        }
 
         return dto;
     }

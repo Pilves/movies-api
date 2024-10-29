@@ -1,87 +1,105 @@
 package com.example.moviesapi.exception;
 
+import com.example.moviesapi.dto.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.format.DateTimeParseException;
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponse> handleApiException(ApiException ex, HttpServletRequest request) {
+        ErrorResponse error = ErrorResponse.of(
+                ex.getCode(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(ex.getStatus()).body(error);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", HttpStatus.CONFLICT.value());
-        body.put("error", "Conflict");
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request) {
 
         String message = "Data integrity violation";
         if (ex.getCause() instanceof ConstraintViolationException) {
-            String constraintName = ((ConstraintViolationException) ex.getCause())
-                    .getConstraintName();
+            String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
 
             if (constraintName != null) {
-                switch (constraintName) {
-                    case "uk_actor_name":
-                        message = "An actor with this name already exists";
-                        break;
-                    case "uk_genre_name":
-                        message = "A genre with this name already exists";
-                        break;
-                    default:
-                        message = "A database constraint was violated";
-                }
+                message = switch (constraintName.toLowerCase()) {
+                    case "uk_actor_name" -> "An actor with this name already exists";
+                    case "uk_genre_name" -> "A genre with this name already exists";
+                    default -> "A database constraint was violated";
+                };
             }
         }
 
-        body.put("message", message);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+        return ResponseEntity
+                .status(ErrorCode.CONSTRAINT_VIOLATION.getStatus())
+                .body(ErrorResponse.of(
+                        ErrorCode.CONSTRAINT_VIOLATION,
+                        message,
+                        request.getRequestURI()
+                ));
     }
 
-    @ExceptionHandler(InvalidPaginationException.class)
-    public ResponseEntity<Object> handleInvalidPaginationException(
-            InvalidPaginationException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Bad Request");
-        body.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
-    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        return createErrorResponse(HttpStatus.NOT_FOUND, ex);
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .reduce((a, b) -> a + "; " + b)
+                .orElse("Validation failed");
+
+        return ResponseEntity
+                .status(ErrorCode.INVALID_REQUEST.getStatus())
+                .body(ErrorResponse.of(
+                        ErrorCode.INVALID_REQUEST,
+                        message,
+                        request.getRequestURI()
+                ));
     }
 
     @ExceptionHandler(DateTimeParseException.class)
-    public ResponseEntity<Object> handleDateTimeParseException(DateTimeParseException ex) {
-        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
+    public ResponseEntity<ErrorResponse> handleDateTimeParseException(
+            DateTimeParseException ex,
+            HttpServletRequest request) {
+
+        return ResponseEntity
+                .status(ErrorCode.INVALID_REQUEST.getStatus())
+                .body(ErrorResponse.of(
+                        ErrorCode.INVALID_REQUEST,
+                        "Invalid date format: " + ex.getMessage(),
+                        request.getRequestURI()
+                ));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleAllExceptions(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleAllOtherExceptions(
+            Exception ex,
+            HttpServletRequest request) {
+
         logger.error("Unexpected error occurred", ex);
-        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
-    }
 
-    private ResponseEntity<Object> createErrorResponse(HttpStatus status, Exception ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", java.time.LocalDateTime.now().toString());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", ex.getMessage());
-
-        return ResponseEntity.status(status).body(body);
+        return ResponseEntity
+                .status(ErrorCode.OPERATION_FAILED.getStatus())
+                .body(ErrorResponse.of(
+                        ErrorCode.OPERATION_FAILED,
+                        "An unexpected error occurred",
+                        request.getRequestURI()
+                ));
     }
 }

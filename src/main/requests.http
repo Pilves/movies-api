@@ -8,15 +8,7 @@ POST {{baseUrl}}/genres
 Content-Type: application/json
 
 {
-  "name": "Action"
-}
-
-### Create Drama genre
-POST {{baseUrl}}/genres
-Content-Type: application/json
-
-{
-  "name": "Drama"
+  "name": "Actions"
 }
 
 ### 1.2 Test Invalid Genre Creation (Duplicate name)
@@ -32,7 +24,7 @@ POST {{baseUrl}}/actors
 Content-Type: application/json
 
 {
-  "name": "Emma Stone",
+  "name": "Emma Stoned",
   "birthDate": "1988-11-06"
 }
 
@@ -124,7 +116,7 @@ GET {{baseUrl}}/movies?actor=1
 ### 5. UPDATE OPERATIONS
 
 ### 5.1 Update genre (PATCH test)
-PATCH {{baseUrl}}/genres/1
+PATCH {{baseUrl}}/genres/7
 Content-Type: application/json
 
 {
@@ -180,7 +172,7 @@ Content-Type: application/json
   "releaseYear": 2010,
   "duration": 148,
   "genres": [
-    {"id": 1},
+    {"id": 2},
     {"id": 3},
     {"id": 5}
   ],
@@ -200,7 +192,7 @@ Content-Type: application/json
   "releaseYear": 2010,
   "duration": 162,
   "genres": [
-    {"id": 1},
+    {"id": 2},
     {"id": 3}
   ],
   "actors": [
@@ -208,3 +200,31 @@ Content-Type: application/json
     {"id": 3}
   ]
 }
+
+### 9 Create a new Review
+POST {{baseUrl}}/movies/1/reviews?userName=Pilves
+Content-Type: application/json
+
+{
+  "rating": 5,
+  "comment": "This is the best movie ever!"
+}
+
+### 9.0.1 Create a new Review
+POST {{baseUrl}}/movies/1/reviews?userName=Heiter
+Content-Type: application/json
+
+{
+  "rating": 2,
+  "comment": "This is the averagest movie ever!"
+}
+
+### 9.1 Get all reviews for a movie
+GET {{baseUrl}}/movies/1/reviews?page=0&size=10
+
+
+### 9.2 Get average rating for a movie
+GET {{baseUrl}}/movies/1/reviews/average
+
+### 9.3 Delete a review
+DELETE {{baseUrl}}/movies/1/reviews/1?userName=Pilves

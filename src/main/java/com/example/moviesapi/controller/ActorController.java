@@ -1,7 +1,6 @@
 package com.example.moviesapi.controller;
 
 import com.example.moviesapi.dto.ActorDTO;
-import com.example.moviesapi.dto.ActorSummaryDTO;
 import com.example.moviesapi.entity.Actor;
 import com.example.moviesapi.service.ActorService;
 import com.example.moviesapi.mapper.ActorMapper;
@@ -23,42 +22,45 @@ public class ActorController {
 
     @PostMapping
     public ActorDTO createActor(@RequestBody Actor actor) {
-        return actorMapper.toDTO(actorService.createActor(actor));
+        return actorMapper.toDTO(actorService.createActor(actor), false);
     }
 
     @GetMapping
-    public ResponseEntity<Page<ActorSummaryDTO>> getAllActors(@RequestParam(required = false) String name, Pageable pageable) {
-        Page<Actor> actorPage = name != null ? actorService.getActorsByName(name, pageable) : actorService.getAllActors(pageable);
-        Page<ActorSummaryDTO> summaryPage = actorPage.map(this::toSummaryDTO);
-        return ResponseEntity.ok(summaryPage);
+    public ResponseEntity<Page<ActorDTO>> getAllActors(
+            @RequestParam(required = false) String name,
+            Pageable pageable) {
+        Page<Actor> actorPage = name != null ?
+                actorService.getActorsByName(name, pageable) :
+                actorService.getAllActors(pageable);
+        return ResponseEntity.ok(actorPage.map(actor -> actorMapper.toDTO(actor, false)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ActorSummaryDTO> getActorById(@PathVariable Long id) {
-        return ResponseEntity.ok(toSummaryDTO(actorService.getActorById(id)));
+    public ResponseEntity<ActorDTO> getActorById(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean includeMovies) {
+        return ResponseEntity.ok(actorMapper.toDTO(actorService.getActorById(id), includeMovies));
     }
 
     @GetMapping("/{id}/details")
     public ResponseEntity<ActorDTO> getActorDetails(@PathVariable Long id) {
-        return ResponseEntity.ok(actorMapper.toDTO(actorService.getActorById(id)));
+        return ResponseEntity.ok(actorMapper.toDTO(actorService.getActorById(id), true));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ActorDTO> updateActor(@PathVariable Long id, @RequestBody Actor actorDetails) {
-        return ResponseEntity.ok(actorMapper.toDTO(actorService.updateActor(id, actorDetails)));
+    public ResponseEntity<ActorDTO> updateActor(
+            @PathVariable Long id,
+            @RequestBody Actor actorDetails) {
+        return ResponseEntity.ok(
+                actorMapper.toDTO(actorService.updateActor(id, actorDetails), false)
+        );
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteActor(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean force) {
+    public ResponseEntity<Void> deleteActor(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean force) {
         actorService.deleteActor(id, force);
         return ResponseEntity.noContent().build();
-    }
-
-    private ActorSummaryDTO toSummaryDTO(Actor actor) {
-        ActorSummaryDTO dto = new ActorSummaryDTO();
-        dto.setId(actor.getId());
-        dto.setName(actor.getName());
-        dto.setBirthDate(String.valueOf(actor.getBirthDate()));
-        return dto;
     }
 }

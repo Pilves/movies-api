@@ -19,19 +19,22 @@ A modern, high-performance REST API for managing movie collections, built with S
 - [Data Models](#-data-models)
 - [Error Handling](#-error-handling)
 - [Best Practices](#-best-practices)
+- [Security](#-security)
 
 ## 🌟 Overview
 
-The Movie Database API provides a robust solution for managing movie collections with support for complex relationships between movies, actors, and genres. Built for performance and scalability, it offers comprehensive CRUD operations, advanced searching, and intelligent pagination.
+The Movie Database API provides a robust solution for managing movie collections with support for complex relationships between movies, actors, and genres. Built for performance and scalability, it offers comprehensive CRUD operations, advanced searching, intelligent pagination, and a user review system.
 
 ## ✨ Features
 
-- **📚 Complete CRUD Operations** for movies, actors, and genres
+- **📚 Complete CRUD Operations** for movies, actors, genres, and reviews
+- **⭐ Review & Rating System** with user feedback and scoring
 - **🔍 Advanced Search Capabilities** with case-insensitive matching
 - **📄 Smart Pagination** with configurable page sizes
 - **🔒 Data Validation** and error handling
 - **🤝 Many-to-Many Relationship** management
 - **🚀 High Performance** with optimized queries
+- **📊 Rating Analytics** with average calculations
 
 ## 🛠 Installation
 
@@ -253,6 +256,77 @@ Response: 200 OK
   "totalPages": 1
 }
 ```
+### 🌟 Reviews API
+
+#### Create Movie Review
+```http
+POST /api/movies/{movieId}/reviews?userName={userName}
+Content-Type: application/json
+
+{
+  "rating": 5,
+  "comment": "An absolute masterpiece! The cinematography was breathtaking."
+}
+
+Response: 201 Created
+{
+  "id": 1,
+  "movieId": 123,
+  "movieTitle": "Time Travelers",
+  "userName": "john_doe",
+  "rating": 5,
+  "comment": "An absolute masterpiece! The cinematography was breathtaking.",
+  "createdAt": "2024-10-30T15:30:00Z"
+}
+```
+
+#### Get Movie Reviews (Paginated)
+```http
+GET /api/movies/{movieId}/reviews?page=0&size=10
+
+Response: 200 OK
+{
+  "content": [
+    {
+      "id": 1,
+      "movieId": 123,
+      "movieTitle": "Time Travelers",
+      "userName": "john_doe",
+      "rating": 5,
+      "comment": "An absolute masterpiece!",
+      "createdAt": "2024-10-30T15:30:00Z"
+    },
+    {
+      "id": 2,
+      "movieId": 123,
+      "movieTitle": "Time Travelers",
+      "userName": "jane_smith",
+      "rating": 4,
+      "comment": "Great movie, loved the special effects",
+      "createdAt": "2024-10-30T16:45:00Z"
+    }
+  ],
+  "totalPages": 1,
+  "totalElements": 2,
+  "size": 10,
+  "number": 0
+}
+```
+
+#### Get Movie Average Rating
+```http
+GET /api/movies/{movieId}/reviews/average
+
+Response: 200 OK
+4.5
+```
+
+#### Delete Review
+```http
+DELETE /api/movies/{movieId}/reviews/{reviewId}?userName={userName}
+
+Response: 204 No Content
+```
 
 ## 📊 Data Models
 
@@ -286,6 +360,18 @@ Response: 200 OK
   "movies": "Set<Movie>"
 }
 ```
+### Review
+```json
+{
+  "id": "Long",
+  "movieId": "Long (required)",
+  "userName": "String (required)",
+  "rating": "Integer (required, range: 1-5)",
+  "comment": "String (optional, max: 1000 chars)",
+  "createdAt": "LocalDateTime",
+  "updatedAt": "LocalDateTime"
+}
+```
 
 ## ❌ Error Handling
 
@@ -306,8 +392,9 @@ The API uses standard HTTP status codes and provides detailed error messages:
 - `204` - No Content
 - `400` - Bad Request
 - `404` - Not Found
+- `409` - Conflict (e.g., duplicate review)
 - `500` - Server Error
-
+- 
 ## 💡 Best Practices
 
 1. Use pagination for large datasets
@@ -315,6 +402,9 @@ The API uses standard HTTP status codes and provides detailed error messages:
 3. Use force parameter for deleting related entities
 4. Keep page sizes reasonable (max 100)
 5. Use case-insensitive search for better user experience
+6. One review per user per movie
+7. Provide meaningful review comments
+8. Handle review updates carefully
 
 ## 🔒 Security
 
@@ -322,6 +412,8 @@ The API uses standard HTTP status codes and provides detailed error messages:
 - Pagination limits to prevent DoS
 - Data integrity checks
 - Safe deletion handling
+- Review ownership validation
+- Comment content validation
 
 
 ---
